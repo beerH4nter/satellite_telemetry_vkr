@@ -1,7 +1,7 @@
-.docx
-.pdf
-.vsd
-.drawio
-.svg
-.vsdx
-.jpg
+*.docx
+*.pdf
+*.vsd
+*.drawio
+*.svg
+*.vsdx
+*.jpg

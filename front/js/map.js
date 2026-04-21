@@ -39,39 +39,55 @@ document.getElementById("center-btn").addEventListener("click", () => {
 });
 
 const sourceId = "orbit-path";
+const layerId = "orbit-line";
 
 function orbitLineColor() {
     return document.documentElement.dataset.theme === "dark" ? "#7eb8aa" : "#5d8a7a";
 }
 
-function addOrbitLayer() {
-    if (map.getSource(sourceId)) return;
-
-    map.addSource(sourceId, {
-        type: "geojson",
-        data: {
-            type: "Feature",
-            geometry: {
-                type: "LineString",
-                coordinates: [],
+/** Добавляет источник и слой трека; при смене стиля MapLibre удаляет пользовательские слои — вызывается снова на style.load */
+function ensureOrbitLayer() {
+    if (!map.getSource(sourceId)) {
+        map.addSource(sourceId, {
+            type: "geojson",
+            data: {
+                type: "Feature",
+                geometry: {
+                    type: "LineString",
+                    coordinates: [],
+                },
             },
-        },
-    });
+        });
+    }
 
-    map.addLayer({
-        id: "orbit-line",
-        type: "line",
-        source: sourceId,
-        paint: {
-            "line-color": orbitLineColor(),
-            "line-width": 2,
-        },
-    });
+    if (!map.getLayer(layerId)) {
+        map.addLayer({
+            id: layerId,
+            type: "line",
+            source: sourceId,
+            layout: {
+                "line-join": "round",
+                "line-cap": "round",
+            },
+            paint: {
+                "line-color": orbitLineColor(),
+                "line-width": 3,
+                "line-opacity": 0.95,
+            },
+        });
+        try {
+            map.moveLayer(layerId);
+        } catch (_) {
+            /* ignore if style ещё не готов */
+        }
+    } else {
+        map.setPaintProperty(layerId, "line-color", orbitLineColor());
+    }
 }
 
 function restoreOrbitData() {
     const src = map.getSource(sourceId);
-    if (!src) return;
+    if (!src || typeof src.setData !== "function") return;
     src.setData({
         type: "Feature",
         geometry: {
@@ -82,15 +98,12 @@ function restoreOrbitData() {
 }
 
 function onMapStyleReady() {
-    addOrbitLayer();
-    const layerId = "orbit-line";
-    if (map.getLayer(layerId)) {
-        map.setPaintProperty(layerId, "line-color", orbitLineColor());
-    }
+    ensureOrbitLayer();
     restoreOrbitData();
 }
 
-map.on("load", onMapStyleReady);
+// Только style.load: после загрузки векторного стиля Carto пользовательские слои должны попасть поверх подложки.
+// Событие load может приходить в другом порядке и давать «пустой» трек до первой перерисовки стиля.
 map.on("style.load", onMapStyleReady);
 
 window.setTelemetryMapTheme = function setTelemetryMapTheme(isDark) {
@@ -107,7 +120,7 @@ function updateMap(lat, lon) {
     if (path.length > 100) path.shift();
 
     const src = map.getSource(sourceId);
-    if (!src) return;
+    if (!src || typeof src.setData !== "function") return;
     src.setData({
         type: "Feature",
         geometry: {
