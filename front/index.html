@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ru">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Satellite Telemetry</title>
+
+        <link href="https://unpkg.com/maplibre-gl@3.6.0/dist/maplibre-gl.css" rel="stylesheet" />
+        <script src="https://unpkg.com/maplibre-gl@3.6.0/dist/maplibre-gl.js"></script>
+
+        <link rel="stylesheet" href="css/style.css" />
+    </head>
+    <body>
+        <header class="site-header">
+            <div class="brand">
+                <img class="brand-logo" src="images/logo.png" alt="" width="52" height="52" id="logo" />
+                <div class="brand-text">
+                    <h1 id="title">Телеметрия спутника</h1>
+                    <p class="tagline" id="tagline">Мониторинг параметров в реальном времени</p>
+                </div>
+            </div>
+            <div class="top-bar card">
+                <button id="btn-pdf" class="btn" type="button" onclick="downloadPDF()">Скачать PDF</button>
+                <button id="btn-csv" class="btn" type="button" onclick="downloadCSV()">Скачать CSV</button>
+                <button id="btn-theme" class="btn btn-secondary" type="button" aria-pressed="false">
+                    Тёмная тема
+                </button>
+                <label for="lang" class="visually-hidden">Language</label>
+                <select id="lang" aria-label="Language">
+                    <option value="ru">Русский</option>
+                    <option value="en">English</option>
+                </select>
+            </div>
+        </header>
+
+        <div class="container">
+            <div class="card">
+                <table id="telemetry"></table>
+
+                <div id="orientation" class="inner-card">
+                    <h3 id="orient_title">Ориентация аппарата</h3>
+
+                    <div class="orientation-wrapper">
+                        <div class="canvas-wrapper">
+                            <canvas id="canvas" width="260" height="260"></canvas>
+                        </div>
+
+                        <div class="orientation-values">
+                            <div>Roll: <span id="roll">0°</span></div>
+                            <div>Pitch: <span id="pitch">0°</span></div>
+                            <div>Yaw: <span id="yaw">0°</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="right-column">
+                <div id="map" class="card">
+                    <button type="button" id="center-btn" class="map-btn" title="Center map">◎</button>
+                </div>
+
+                <div class="card chart-container">
+                    <canvas id="tempChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+        <script src="js/pdf.js"></script>
+        <script src="js/lang.js"></script>
+        <script src="js/table.js"></script>
+        <script src="js/orientation.js"></script>
+        <script src="js/theme.js"></script>
+        <script src="js/map.js"></script>
+        <script src="js/chart.js"></script>
+        <script src="js/ws.js"></script>
+    </body>
+</html>
