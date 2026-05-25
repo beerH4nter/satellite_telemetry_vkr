@@ -13,7 +13,7 @@ type CommunicationSession struct {
 	RemoteAddr string
 	StartedAt  time.Time
 	EndedAt    *time.Time
-	Readings   []processor.Telemetry
+	Readings   []processor.FullTelemetry
 }
 
 type MemoryStore struct {
@@ -43,7 +43,7 @@ func (m *MemoryStore) StartSession(id uint64, remoteAddr string) {
 	m.trimSessionsLocked()
 }
 
-func (m *MemoryStore) AddReading(sessionID uint64, t processor.Telemetry) {
+func (m *MemoryStore) AddReading(sessionID uint64, t processor.FullTelemetry) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
@@ -53,7 +53,7 @@ func (m *MemoryStore) AddReading(sessionID uint64, t processor.Telemetry) {
 			if len(m.sessions[i].Readings) > m.maxPerSession {
 				// старые кадры сеанса отбрасываем (окно внутри связи)
 				excess := len(m.sessions[i].Readings) - m.maxPerSession
-				m.sessions[i].Readings = append([]processor.Telemetry(nil), m.sessions[i].Readings[excess:]...)
+				m.sessions[i].Readings = append([]processor.FullTelemetry(nil), m.sessions[i].Readings[excess:]...)
 			}
 			return
 		}
@@ -87,13 +87,13 @@ func (m *MemoryStore) SessionsCopy() []CommunicationSession {
 	out := make([]CommunicationSession, len(m.sessions))
 	for i := range m.sessions {
 		out[i] = m.sessions[i]
-		out[i].Readings = append([]processor.Telemetry(nil), m.sessions[i].Readings...)
+		out[i].Readings = append([]processor.FullTelemetry(nil), m.sessions[i].Readings...)
 	}
 	return out
 }
 
-// Last возвращает последнее принятое показание (по всем сеансам) или nil.
-func (m *MemoryStore) Last() *processor.Telemetry {
+// Last возвращает последний полный кадр (по всем сеансам) или nil.
+func (m *MemoryStore) Last() *processor.FullTelemetry {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 

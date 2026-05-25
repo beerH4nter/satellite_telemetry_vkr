@@ -41,6 +41,9 @@ function toggleTelemetryTheme() {
     if (typeof window.setTelemetryMapTheme === "function") {
         window.setTelemetryMapTheme(telemetryThemeIsDark());
     }
+    if (typeof window.setAdvancedMapTheme === "function") {
+        window.setAdvancedMapTheme(telemetryThemeIsDark());
+    }
 }
 
 document.addEventListener("DOMContentLoaded", () => {

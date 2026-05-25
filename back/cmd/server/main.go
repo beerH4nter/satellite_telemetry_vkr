@@ -17,26 +17,6 @@ import (
 	"back/internal/storage"
 )
 
-func formatTelemetryForFrontend(t *processor.Telemetry) map[string]interface{} {
-	sec := int64(t.OnboardTime)
-	nsec := int64((t.OnboardTime - float64(sec)) * 1e9)
-	ts := time.Unix(sec, nsec)
-
-	return map[string]interface{}{
-		"onboard_time": ts.Format("02.01.2006 15:04:05.000"),
-		"velocity":     t.Velocity,
-		"roll":         t.Roll,
-		"pitch":        t.Pitch,
-		"yaw":          t.Yaw,
-		"temp_avg":     t.TempAvg,
-		"temp_sun":     t.TempSun,
-		"temp_shadow":  t.TempShadow,
-		"latitude":     t.Latitude,
-		"longitude":    t.Longitude,
-		"altitude":     t.Altitude,
-	}
-}
-
 func main() {
 	hub := broadcaster.NewHub()
 	go hub.Run()
@@ -55,16 +35,19 @@ func main() {
 				store.StartSession(ev.SessionID, ev.RemoteAddr)
 
 			case tcp.RxData:
-				telem, err := processor.Parse(ev.Payload)
+				frames, err := processor.ParseAll(ev.Payload)
 				if err != nil {
 					log.Println("parse error:", err)
 					continue
 				}
-				store.AddReading(ev.SessionID, *telem)
+				for i := range frames {
+					telem := frames[i]
+					store.AddReading(ev.SessionID, telem)
 
-				view := formatTelemetryForFrontend(telem)
-				bs, _ := json.Marshal(view)
-				hub.Broadcast(bs)
+					view := processor.FormatWSMessage(&telem)
+					bs, _ := json.Marshal(view)
+					hub.Broadcast(bs)
+				}
 
 			case tcp.RxSessionClosed:
 				store.EndSession(ev.SessionID)
@@ -79,6 +62,9 @@ func main() {
 
 	mux.HandleFunc("/api/telemetry/pdf", api.TelemetryPDFHandler(store))
 	mux.HandleFunc("/api/telemetry/csv", api.TelemetryCSVHandler(store))
+	mux.HandleFunc("/api/telemetry/csv/full", api.TelemetryFullCSVHandler(store))
+	mux.HandleFunc("/api/telemetry/full/latest", api.TelemetryFullLatestHandler(store))
+	mux.HandleFunc("/api/telemetry/sessions/export", api.TelemetrySessionsExportHandler(store))
 
 	srv := &http.Server{
 		Addr:    ":8080",

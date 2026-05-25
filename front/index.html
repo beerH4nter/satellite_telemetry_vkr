@@ -20,8 +20,10 @@
                 </div>
             </div>
             <div class="top-bar card">
-                <button id="btn-pdf" class="btn" type="button" onclick="downloadPDF()">Скачать PDF</button>
-                <button id="btn-csv" class="btn" type="button" onclick="downloadCSV()">Скачать CSV</button>
+                <button id="btn-pdf" class="btn" type="button">Скачать PDF</button>
+                <button id="btn-csv" class="btn" type="button">CSV (учебный)</button>
+                <button id="btn-csv-full" class="btn btn-secondary" type="button">CSV (полный)</button>
+                <button id="btn-json" class="btn btn-secondary" type="button">JSON сеансы</button>
                 <button id="btn-theme" class="btn btn-secondary" type="button" aria-pressed="false">
                     Тёмная тема
                 </button>
@@ -33,47 +35,166 @@
             </div>
         </header>
 
-        <div class="container">
-            <div class="card">
-                <table id="telemetry"></table>
+        <nav class="main-nav card" role="tablist" aria-label="Режимы просмотра">
+            <button type="button" class="nav-btn active" data-tab="live-simple" role="tab" aria-selected="true" id="tab-btn-simple">
+                Учебный режим
+            </button>
+            <button type="button" class="nav-btn" data-tab="live-advanced" role="tab" aria-selected="false" id="tab-btn-advanced">
+                Инженерный режим
+            </button>
+            <button type="button" class="nav-btn" data-tab="replay" role="tab" aria-selected="false" id="tab-btn-replay">
+                Воспроизведение сеанса
+            </button>
+        </nav>
 
-                <div id="orientation" class="inner-card">
-                    <h3 id="orient_title">Ориентация аппарата</h3>
-
-                    <div class="orientation-wrapper">
-                        <div class="canvas-wrapper">
-                            <canvas id="canvas" width="260" height="260"></canvas>
-                        </div>
-
-                        <div class="orientation-values">
-                            <div>Roll: <span id="roll">0°</span></div>
-                            <div>Pitch: <span id="pitch">0°</span></div>
-                            <div>Yaw: <span id="yaw">0°</span></div>
+        <!-- Учебный режим (упрощённая телеметрия) -->
+        <section id="panel-live-simple" class="tab-panel" role="tabpanel">
+            <p class="panel-hint" id="hint-simple"></p>
+            <div class="container">
+                <div class="card">
+                    <table id="telemetry"></table>
+                    <div id="orientation" class="inner-card">
+                        <h3 id="orient_title">Ориентация аппарата</h3>
+                        <div class="orientation-wrapper">
+                            <div class="canvas-wrapper">
+                                <canvas id="canvas" width="260" height="260"></canvas>
+                            </div>
+                            <div class="orientation-values">
+                                <div>Roll: <span id="roll">0°</span></div>
+                                <div>Pitch: <span id="pitch">0°</span></div>
+                                <div>Yaw: <span id="yaw">0°</span></div>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="right-column">
-                <div id="map" class="card">
-                    <button type="button" id="center-btn" class="map-btn" title="Center map">◎</button>
+                <div class="right-column">
+                    <div id="map" class="card">
+                        <button type="button" id="center-btn" class="map-btn" title="Center map">◎</button>
+                    </div>
+                    <div class="card chart-container">
+                        <canvas id="tempChart"></canvas>
+                    </div>
                 </div>
+            </div>
+        </section>
 
-                <div class="card chart-container">
-                    <canvas id="tempChart"></canvas>
+        <!-- Инженерный режим (полная телеметрия) -->
+        <section id="panel-live-advanced" class="tab-panel hidden" role="tabpanel">
+            <p class="panel-hint" id="hint-advanced"></p>
+            <div class="container container-wide">
+                <div class="card advanced-left">
+                    <div id="advanced-telemetry" class="advanced-groups"></div>
+                    <div id="orientation-advanced" class="inner-card">
+                        <h3 id="orient_title_advanced">Ориентация (полный кадр)</h3>
+                        <div class="orientation-wrapper">
+                            <div class="canvas-wrapper">
+                                <canvas id="canvas-advanced" width="260" height="260"></canvas>
+                            </div>
+                            <div class="orientation-values">
+                                <div>Roll: <span id="roll-advanced">0°</span></div>
+                                <div>Pitch: <span id="pitch-advanced">0°</span></div>
+                                <div>Yaw: <span id="yaw-advanced">0°</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="right-column">
+                    <div id="map-advanced" class="card">
+                        <button type="button" id="center-btn-advanced" class="map-btn" title="Center map">◎</button>
+                    </div>
+                    <div class="card chart-container chart-half">
+                        <canvas id="tempChart-advanced"></canvas>
+                    </div>
+                    <div class="card chart-container chart-half">
+                        <canvas id="powerChart-advanced"></canvas>
+                    </div>
                 </div>
             </div>
-        </div>
+        </section>
 
-        <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+        <!-- Воспроизведение записанного сеанса -->
+        <section id="panel-replay" class="tab-panel hidden" role="tabpanel">
+            <p class="panel-hint" id="hint-replay"></p>
+            <div class="card replay-controls">
+                <label class="file-label">
+                    <span id="replay-file-label">Загрузить JSON сеанса</span>
+                    <input type="file" id="replay-file" accept=".json,application/json" />
+                </label>
+                <button type="button" class="btn" id="replay-play">▶ Воспроизвести</button>
+                <button type="button" class="btn btn-secondary" id="replay-stop">■ Стоп</button>
+                <label class="replay-speed-label">
+                    <span id="replay-speed-label">Скорость</span>
+                    <select id="replay-speed">
+                        <option value="0.25">0.25×</option>
+                        <option value="0.5">0.5×</option>
+                        <option value="1" selected>1×</option>
+                        <option value="2">2×</option>
+                        <option value="4">4×</option>
+                        <option value="8">8×</option>
+                    </select>
+                </label>
+                <input type="range" id="replay-seek" class="replay-seek" min="0" max="0" value="0" />
+                <span id="replay-time-label" class="replay-time">0 / 0 s</span>
+                <p id="replay-session-info" class="muted replay-meta"></p>
+                <div class="replay-view-toggle">
+                    <button type="button" class="btn btn-secondary replay-view-btn active" data-replay-view="simple" id="replay-view-simple">Учебный вид</button>
+                    <button type="button" class="btn btn-secondary replay-view-btn" data-replay-view="advanced" id="replay-view-advanced">Инженерный вид</button>
+                </div>
+            </div>
+
+            <div class="container">
+                <div class="card replay-left">
+                    <div id="replay-panel-simple">
+                        <table id="telemetry-replay"></table>
+                    </div>
+                    <div id="replay-panel-advanced" class="hidden">
+                        <div id="replay-advanced-telemetry" class="advanced-groups replay-adv-scroll"></div>
+                    </div>
+                    <div id="replay-orientation" class="inner-card">
+                        <h3 id="orient_title_replay">Ориентация</h3>
+                        <div class="orientation-wrapper">
+                            <div class="canvas-wrapper">
+                                <canvas id="canvas-replay" width="220" height="220"></canvas>
+                            </div>
+                            <div class="orientation-values">
+                                <div>Roll: <span id="roll-replay">0°</span></div>
+                                <div>Pitch: <span id="pitch-replay">0°</span></div>
+                                <div>Yaw: <span id="yaw-replay">0°</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="right-column">
+                    <div id="map-replay" class="card map-replay">
+                        <button type="button" id="center-btn-replay" class="map-btn" title="Center map">◎</button>
+                    </div>
+                    <div class="card chart-container chart-half">
+                        <canvas id="tempChart-replay"></canvas>
+                    </div>
+                    <div class="card chart-container chart-half">
+                        <canvas id="powerChart-replay"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-        <script src="js/pdf.js"></script>
+        <script src="js/telemetry-utils.js"></script>
         <script src="js/lang.js"></script>
         <script src="js/table.js"></script>
+        <script src="js/advanced-table.js"></script>
         <script src="js/orientation.js"></script>
+        <script src="js/orientation-advanced.js"></script>
         <script src="js/theme.js"></script>
         <script src="js/map.js"></script>
+        <script src="js/map-advanced.js"></script>
         <script src="js/chart.js"></script>
+        <script src="js/chart-advanced.js"></script>
+        <script src="js/pdf.js"></script>
+        <script src="js/app.js"></script>
         <script src="js/ws.js"></script>
+        <script src="js/replay-viz.js"></script>
+        <script src="js/replay.js"></script>
     </body>
 </html>

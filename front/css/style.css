@@ -326,3 +326,177 @@ canvas {
     white-space: nowrap;
     border: 0;
 }
+
+.main-nav {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+    padding: 10px 14px;
+}
+
+.nav-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 16px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.nav-btn:hover {
+    background: var(--accent-soft);
+    color: var(--text);
+}
+
+.nav-btn.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+}
+
+.hidden {
+    display: none !important;
+}
+
+.tab-panel.hidden {
+    display: none;
+}
+
+.panel-hint {
+    margin: 0 0 14px;
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+    line-height: 1.45;
+    max-width: 960px;
+}
+
+.container-wide {
+    grid-template-columns: minmax(360px, 480px) 1fr;
+}
+
+.advanced-groups {
+    max-height: 420px;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+.param-group {
+    margin-bottom: 16px;
+}
+
+.param-group-title {
+    margin: 0 0 8px;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.param-group-table {
+    width: 100%;
+    font-size: 0.8125rem;
+}
+
+.param-group-table th,
+.param-group-table td {
+    padding: 6px 10px;
+}
+
+.chart-half {
+    height: 200px;
+}
+
+#map-advanced {
+    height: 420px;
+    min-height: 320px;
+    border-radius: var(--radius);
+    overflow: hidden;
+    position: relative;
+    border: 1px solid var(--border);
+}
+
+.map-replay {
+    height: 380px;
+    min-height: 280px;
+    border-radius: var(--radius);
+    overflow: hidden;
+    position: relative;
+    border: 1px solid var(--border);
+}
+
+.replay-controls {
+    margin-bottom: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+}
+
+.replay-controls .file-label input[type="file"] {
+    font-size: 0.8125rem;
+    max-width: 220px;
+}
+
+.replay-seek {
+    flex: 1;
+    min-width: 180px;
+    max-width: 480px;
+}
+
+.replay-time {
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+    white-space: nowrap;
+}
+
+.replay-meta {
+    width: 100%;
+    margin: 0;
+    font-size: 0.8125rem;
+}
+
+.replay-view-toggle {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    width: 100%;
+}
+
+.replay-view-btn.active {
+    background: var(--accent-soft);
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.muted {
+    color: var(--text-muted);
+}
+
+#replay-play.active {
+    background: var(--accent-hover);
+}
+
+.replay-adv-scroll {
+    max-height: 360px;
+}
+
+#replay-orientation {
+    margin-top: 16px;
+}
+
+.replay-left {
+    min-width: 0;
+}
+
+.replay-speed-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.875rem;
+    color: var(--text-muted);
+}

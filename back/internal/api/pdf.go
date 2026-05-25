@@ -69,7 +69,7 @@ func TelemetryPDFHandler(store *storage.MemoryStore) http.HandlerFunc {
 			}
 			pdf.Ln(-1)
 
-			rows := selectRowsForPDF(sess.Readings)
+			rows := selectRowsForPDF(sess.Readings) // упрощённые поля в PDF
 			for _, row := range rows {
 				if pdf.GetY() > 275 {
 					pdf.AddPage()
@@ -106,12 +106,13 @@ func formatSessionTitle(sess storage.CommunicationSession) string {
 	)
 }
 
-func selectRowsForPDF(readings []processor.Telemetry) []pdfRow {
+func selectRowsForPDF(readings []processor.FullTelemetry) []pdfRow {
 	n := len(readings)
 	if n <= pdfMaxRowsShown {
 		out := make([]pdfRow, n)
 		for i := range readings {
-			out[i] = pdfRow{idx: i + 1, t: readings[i]}
+			s := readings[i].ToSimple()
+			out[i] = pdfRow{idx: i + 1, t: s}
 		}
 		return out
 	}
@@ -119,12 +120,12 @@ func selectRowsForPDF(readings []processor.Telemetry) []pdfRow {
 	tail := pdfMaxRowsShown - head - 1
 	out := make([]pdfRow, 0, head+tail+1)
 	for i := 0; i < head; i++ {
-		out = append(out, pdfRow{idx: i + 1, t: readings[i]})
+		out = append(out, pdfRow{idx: i + 1, t: readings[i].ToSimple()})
 	}
 	out = append(out, pdfRow{idx: -1, t: processor.Telemetry{}})
 	for i := 0; i < tail; i++ {
 		idx := n - tail + i
-		out = append(out, pdfRow{idx: idx + 1, t: readings[idx]})
+		out = append(out, pdfRow{idx: idx + 1, t: readings[idx].ToSimple()})
 	}
 	return out
 }

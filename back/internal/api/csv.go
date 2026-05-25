@@ -58,7 +58,7 @@ func TelemetryCSVHandler(store *storage.MemoryStore) http.HandlerFunc {
 				endStr = sess.EndedAt.UTC().Format(time.RFC3339Nano)
 			}
 			for i, t := range sess.Readings {
-				row := telemetryToCSVRow(sess.ID, startStr, endStr, sess.RemoteAddr, i+1, t)
+				row := telemetryToCSVRow(sess.ID, startStr, endStr, sess.RemoteAddr, i+1, t.ToSimple())
 				if err := cw.Write(row); err != nil {
 					return
 				}
